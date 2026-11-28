@@ -72,8 +72,15 @@ class SOTAScaffoldingAuditor:
 
         for idx, event in enumerate(self.plan.get("events", []), 1):
             target_edge = tuple(event["target_edge"])
-            new_weight = event["new_weight"]
-            event_data = {"edge": target_edge, "new_weight": new_weight, "start": start, "goal": goal}
+            new_weight = event.get("new_weight")
+            event_data = {
+                "type": event.get("type"),
+                "edge": target_edge,
+                "new_weight": new_weight,
+                "new_capacity": event.get("new_capacity"),
+                "start": start,
+                "goal": goal,
+            }
 
             print(f"  -> Testing Event #{idx}: Edge {target_edge} weight -> {new_weight}")
             try:

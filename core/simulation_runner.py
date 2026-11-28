@@ -9,10 +9,12 @@ from core.base_algorithm import BaseGraphAlgorithm
 class RerouteResult:
     description: str
     target_edge: Tuple[int, int]
-    new_weight: float
+    new_weight: Optional[float]
     path: List[int]
     cost: float
     elapsed_ms: float
+    new_capacity: Optional[float] = None
+    event_type: Optional[str] = None
 
 
 @dataclass
@@ -22,6 +24,7 @@ class SimulationResult:
     initial_path: List[int]
     initial_cost: float
     initial_elapsed_ms: float
+    result_kind: str = "path"
     reroutes: List[RerouteResult] = field(default_factory=list)
     skipped_events: List[Dict[str, Any]] = field(default_factory=list)
 
@@ -72,6 +75,9 @@ class SimulationRunner:
             initial_path=path,
             initial_cost=cost,
             initial_elapsed_ms=initial_elapsed_ms,
+            result_kind=(
+                "max_flow" if hasattr(self.solver, "max_flow_value") else "path"
+            ),
         )
         self._notify("on_initial_route", result)
 
@@ -93,8 +99,10 @@ class SimulationRunner:
     ) -> RerouteResult:
         target_edge = tuple(event["target_edge"])
         event_data = {
+            "type": event.get("type"),
             "edge": target_edge,
-            "new_weight": event["new_weight"],
+            "new_weight": event.get("new_weight"),
+            "new_capacity": event.get("new_capacity"),
             "start": start_node,
             "goal": goal_node,
         }
@@ -106,10 +114,12 @@ class SimulationRunner:
         return RerouteResult(
             description=event.get("description", ""),
             target_edge=target_edge,
-            new_weight=event["new_weight"],
+            new_weight=event.get("new_weight"),
             path=path,
             cost=cost,
             elapsed_ms=elapsed_ms,
+            new_capacity=event.get("new_capacity"),
+            event_type=event.get("type"),
         )
 
     def _notify(self, hook: str, *args) -> None:

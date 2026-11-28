@@ -36,10 +36,19 @@ def build_parser() -> argparse.ArgumentParser:
         default=None,
         help="Registry key/alias algoritma (mis. pathfinding, spanning_tree).",
     )
+    parser.add_argument(
+        "--no-viz",
+        action="store_true",
+        help="Jalankan tanpa membuka jendela Matplotlib (cocok untuk demo terminal).",
+    )
     return parser
 
 
-def run_single(yaml_path: Path, algorithm_override: Optional[str] = None) -> SimulationResult:
+def run_single(
+    yaml_path: Path,
+    algorithm_override: Optional[str] = None,
+    show_visualization: bool = True,
+) -> SimulationResult:
     loader = ScenarioLoader(yaml_path)
     metadata = loader.get_metadata()
     plan = loader.get_execution_plan()
@@ -52,7 +61,8 @@ def run_single(yaml_path: Path, algorithm_override: Optional[str] = None) -> Sim
 
     runner = SimulationRunner(solver=solver, plan=plan, metadata=metadata)
     runner.attach(ConsoleReportObserver())
-    runner.attach(VisualizerSnapshotObserver(graph_model.nx_graph))
+    if show_visualization:
+        runner.attach(VisualizerSnapshotObserver(graph_model.nx_graph))
     runner.attach(TraceExportObserver(solver))
     return runner.execute()
 
@@ -62,7 +72,11 @@ def main(argv: Optional[List[str]] = None) -> None:
     scenario_paths = collect_scenario_paths(args.scenarios, include_all=args.all)
 
     for yaml_path in scenario_paths:
-        run_single(yaml_path, algorithm_override=args.algorithm)
+        run_single(
+            yaml_path,
+            algorithm_override=args.algorithm,
+            show_visualization=not args.no_viz,
+        )
 
 
 if __name__ == "__main__":

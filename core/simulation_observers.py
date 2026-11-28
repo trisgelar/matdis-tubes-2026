@@ -10,11 +10,19 @@ class ConsoleReportObserver(SimulationObserver):
     def on_initial_route(self, result: SimulationResult) -> None:
         print(f"=== RUNNING SIMULATION: {result.metadata['title']} ===")
         print(f"Algorithm: {result.algorithm_name}")
-        print(f"-> Rute Awal  : {result.initial_path} (Cost: {result.initial_cost})")
+        if result.result_kind == "max_flow":
+            print(f"-> Max Flow Awal: {result.initial_cost}")
+            print(f"-> Path Representatif: {result.initial_path}")
+        else:
+            print(f"-> Rute Awal  : {result.initial_path} (Cost: {result.initial_cost})")
 
     def on_reroute(self, result: SimulationResult, reroute: RerouteResult) -> None:
         print(f"\n[EVENT INJECTED] {reroute.description}")
-        print(f"-> Rute Baru  : {reroute.path} (Cost: {reroute.cost})")
+        if result.result_kind == "max_flow":
+            print(f"-> Max Flow Baru: {reroute.cost}")
+            print(f"-> Path Representatif: {reroute.path}")
+        else:
+            print(f"-> Rute Baru  : {reroute.path} (Cost: {reroute.cost})")
 
     def on_event_skipped(self, result: SimulationResult, event: Dict[str, Any]) -> None:
         print(
@@ -29,20 +37,31 @@ class VisualizerSnapshotObserver(SimulationObserver):
         self.visualizer = SimpleGraphVisualizer(graph)
 
     def on_initial_route(self, result: SimulationResult) -> None:
-        self.visualizer.draw_snapshot(
-            title=(
+        if result.result_kind == "max_flow":
+            title = (
+                f"Kondisi Normal - {result.metadata['title']}\n"
+                f"Max Flow: {result.initial_cost} | Path: {result.initial_path}"
+            )
+        else:
+            title = (
                 f"Kondisi Normal - {result.metadata['title']}\n"
                 f"Rute Awal: {result.initial_path} (Cost: {result.initial_cost})"
-            ),
-            active_path=result.initial_path,
-        )
+            )
+        self.visualizer.draw_snapshot(title=title, active_path=result.initial_path)
 
     def on_reroute(self, result: SimulationResult, reroute: RerouteResult) -> None:
-        self.visualizer.draw_snapshot(
-            title=(
+        if result.result_kind == "max_flow":
+            title = (
+                f"Event: {reroute.description}\n"
+                f"Max Flow: {reroute.cost} | Path: {reroute.path}"
+            )
+        else:
+            title = (
                 f"Event: {reroute.description}\n"
                 f"Rute Baru: {reroute.path} (Cost: {reroute.cost})"
-            ),
+            )
+        self.visualizer.draw_snapshot(
+            title=title,
             active_path=reroute.path,
             highlighted_edge=reroute.target_edge,
         )

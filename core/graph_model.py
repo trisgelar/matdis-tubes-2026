@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 import networkx as nx
 
 
@@ -17,9 +17,23 @@ class SpatialGraphModel:
         """Menambahkan node dengan metadata spasial dan label."""
         self._graph.add_node(node_id, label=label, pos=tuple(pos))
 
-    def add_weighted_edge(self, u: int, v: int, weight: float):
-        """Menambahkan edge searah dengan bobot."""
-        self._graph.add_edge(u, v, weight=weight)
+    def add_weighted_edge(
+        self,
+        u: int,
+        v: int,
+        weight: float = 1.0,
+        capacity: Optional[float] = None,
+    ):
+        """Menambahkan edge searah dengan bobot dan kapasitas opsional.
+
+        ``weight`` dipakai oleh algoritma pathfinding/MST, sedangkan
+        ``capacity`` dipakai oleh algoritma maximum flow. Keduanya sengaja
+        disimpan terpisah agar satu skenario bisa dipakai lintas kategori.
+        """
+        edge_data: Dict[str, Any] = {"weight": weight}
+        if capacity is not None:
+            edge_data["capacity"] = capacity
+        self._graph.add_edge(u, v, **edge_data)
 
     def update_edge_weight(self, u: int, v: int, new_weight: float) -> float:
         """Mengubah bobot edge dan mengembalikan bobot lama (old weight)."""
@@ -40,6 +54,13 @@ class SpatialGraphModel:
         """Mengambil seluruh koordinat spasial node dari atribut 'pos'."""
         return nx.get_node_attributes(self._graph, "pos")
 
+    @staticmethod
+    def _edge_to_dict(u: int, v: int, data: Dict[str, Any]) -> Dict[str, Any]:
+        edge = {"from": u, "to": v, "weight": data.get("weight", 1.0)}
+        if "capacity" in data:
+            edge["capacity"] = data["capacity"]
+        return edge
+
     def get_topology_dict(self) -> Dict[str, Any]:
         """Ekstraksi struktur topologi awal untuk keperluan logging/JSON export."""
         return {
@@ -52,7 +73,7 @@ class SpatialGraphModel:
                 for n, d in self._graph.nodes(data=True)
             ],
             "edges": [
-                {"from": u, "to": v, "weight": d.get("weight", 1.0)}
+                self._edge_to_dict(u, v, d)
                 for u, v, d in self._graph.edges(data=True)
             ],
         }

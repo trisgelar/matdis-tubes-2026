@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from algorithms.registry import AlgorithmRegistry
+from algorithms.registry import AlgorithmRegistry, resolve_algorithm_key
 from cases.scenario_loader import ScenarioLoader
 from config.settings import CASES_DIR, DEFAULT_ALGORITHM, SCENARIO_FILE_PATTERNS
 
@@ -37,7 +37,8 @@ def test_scenario_pipeline_contract(yaml_path: Path):
     assert plan["start_node"] in G.nodes, f"{yaml_path.name}: start_node tidak ada di graf"
     assert plan["goal_node"] in G.nodes, f"{yaml_path.name}: goal_node tidak ada di graf"
 
-    solver = AlgorithmRegistry.create(DEFAULT_ALGORITHM, model)
+    algorithm_key = resolve_algorithm_key(None, plan, metadata, DEFAULT_ALGORITHM)
+    solver = AlgorithmRegistry.create(algorithm_key, model)
     path, cost = solver.run(plan["start_node"], plan["goal_node"])
     assert isinstance(path, list) and len(path) >= 2, (
         f"{yaml_path.name}: rute awal tidak valid: {path}"
@@ -63,8 +64,10 @@ def test_scenario_pipeline_contract(yaml_path: Path):
             continue
 
         event_data = {
+            "type": event.get("type"),
             "edge": tuple(event["target_edge"]),
-            "new_weight": event["new_weight"],
+            "new_weight": event.get("new_weight"),
+            "new_capacity": event.get("new_capacity"),
             "start": plan["start_node"],
             "goal": plan["goal_node"],
         }

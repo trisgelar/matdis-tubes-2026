@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JIS Max Flow Visualizer</title>
+  <script src="https://unpkg.com/vis-network@9.1.9/standalone/umd/vis-network.min.js"></script>
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <span class="badge">Matematika Diskrit · Case 22</span>
+    <h1>JIS Concert Traffic — Max Flow Visualizer</h1>
+    <p id="subtitle">Konser JIS · N=22 node · 29 edge · Ford-Fulkerson vs Dinic's</p>
+  </div>
+  <div class="header-right">
+    <label class="file-btn" for="jsonLoader">📂 Load JSON
+      <input type="file" id="jsonLoader" accept=".json" />
+    </label>
+  </div>
+</header>
+
+<div class="layout">
+
+  <!-- ── GRAPH ── -->
+  <div class="panel panel-graph">
+    <div class="panel-title">
+      Graf Jaringan Jalan JIS
+      <span class="legend">
+        <span class="dot green"></span> Flow aktif
+        <span class="dot red"></span> Min-cut / bottleneck
+        <span class="dot orange"></span> Edge terdampak event
+        <span class="dot blue"></span> Default
+      </span>
+    </div>
+    <div id="network"></div>
+    <div class="graph-hint">Scroll to zoom · Drag to pan · Hover edge untuk kapasitas</div>
+  </div>
+
+  <!-- ── SIDE PANEL ── -->
+  <div class="side">
+
+    <!-- Event Steps -->
+    <div class="panel">
+      <div class="panel-title">Skenario Dinamis</div>
+      <div id="event-controls">
+        <button class="step-btn active" data-step="-1" onclick="setStep(-1)">
+          🏁 Kondisi Awal
+        </button>
+      </div>
+    </div>
+
+    <!-- Event description -->
+    <div class="panel" id="event-desc-panel" style="display:none">
+      <div class="panel-title">📢 Event Aktif</div>
+      <p id="event-desc-text" class="event-desc"></p>
+    </div>
+
+    <!-- Algorithm comparison -->
+    <div class="panel">
+      <div class="panel-title">Perbandingan Algoritma</div>
+      <table class="cmp-table" id="cmp-table">
+        <thead>
+          <tr>
+            <th>Metrik</th>
+            <th>Ford-Fulkerson</th>
+            <th>Dinic's (SOTA)</th>
+          </tr>
+        </thead>
+        <tbody id="cmp-body">
+          <tr><td colspan="3" class="empty">— load JSON terlebih dahulu —</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Min-cut edges -->
+    <div class="panel">
+      <div class="panel-title">✂️ Min-Cut Edges (Bottleneck)</div>
+      <div id="mincut-list"><span class="empty">—</span></div>
+    </div>
+
+    <!-- Flow paths -->
+    <div class="panel">
+      <div class="panel-title">🔀 Augmenting Paths (FF)</div>
+      <div id="paths-list"><span class="empty">—</span></div>
+    </div>
+
+  </div>
+</div>
+
+<script src="assets/js/replayer-engine.js"></script>
+<script>
+  document.getElementById('jsonLoader').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const data = JSON.parse(ev.target.result);
+        window.engine.load(data);
+        document.getElementById('subtitle').textContent =
+          data.metadata.title + ' · ' + file.name;
+      } catch(err) {
+        alert('Gagal parse JSON: ' + err.message);
+      }
+    };
+    reader.readAsText(file);
+  });
+
+  // Auto-load jika ada sample
+  window.addEventListener('DOMContentLoaded', () => {
+    window.engine = new ReplayerEngine('network');
+
+    // Coba auto-load maxflow_case22.json
+    fetch('../output/maxflow_case22.json')
+      .then(r => r.ok ? r.json() : null)
+      .then(data => { if (data) window.engine.load(data); })
+      .catch(() => {}); // silent fail — user bisa manual load
+  });
+
+  function setStep(step) {
+    window.engine.goToStep(step);
+    document.querySelectorAll('.step-btn').forEach(b => b.classList.remove('active'));
+    document.querySelector(`.step-btn[data-step="${step}"]`)?.classList.add('active');
+  }
+</script>
+</body>
+</html>

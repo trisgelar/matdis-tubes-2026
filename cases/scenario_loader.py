@@ -30,8 +30,19 @@ class ScenarioLoader:
             )
 
         for edge in topology.get("edges", []):
+            capacity = edge.get("capacity")
+            if capacity is not None:
+                capacity = float(capacity)
+                if capacity < 0:
+                    raise ValueError(
+                        f"Kapasitas edge ({edge['from']}, {edge['to']}) "
+                        f"tidak boleh negatif: {capacity}"
+                    )
             model.add_weighted_edge(
-                u=edge["from"], v=edge["to"], weight=edge["weight"]
+                u=edge["from"],
+                v=edge["to"],
+                weight=float(edge.get("weight", 1.0)),
+                capacity=capacity,
             )
 
         return model

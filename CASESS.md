@@ -25,7 +25,7 @@
 | `case_19` | `case_19_parkir_liar.yaml` | Motor parkir sembarangan mempersempit lebar efektif lorong. |
 | `case_20` | `case_20_asap_sate.yaml` | Kepulan asap pembakaran sate tebal mengganggu visibilitas. |
 | `case_21` | `case_21_anjing_galak.yaml` | Anjing penjaga lepas di area persimpangan rute. |
-| `case_22` | `case_22_posyandu_meluap.yaml` | Antrean Posyandu meluber hingga memblokir lorong utama. |
+| `case_22` | `case_22_konser_jis.yaml` | Penutupan drop-off utara dan penyempitan lajur Sunter Barat menurunkan throughput menuju JIS. |
 | `case_23` | `case_23_tumpahan_cat.yaml` | Cat tembok tumpah menutup jalur di dekat tangga darurat. |
 | `case_24` | `case_24_kabel_putus.yaml` | Kabel PLN putus melintang di tengah persimpangan. |
 | `case_25` | `case_25_rombongan_besan.yaml` | Rombongan keluarga pengantin berjalan lambat memenuhi jalan. |
@@ -67,7 +67,7 @@ Pemetaan ini dirancang agar setiap kelompok mahasiswa D4 mendapatkan konteks cer
 | **`case_07`** | `case_07_truk_mogok.yaml` | **Truk Muatan Mogok**: Menyebabkan penyempitan (*bottleneck*) di persimpangan, membatasi jumlah kendaraan/massa yang bisa lewat per menit. |
 | **`case_17`** | `case_17_karnaval_sepeda.yaml` | **Konvoi Karnaval Sepeda**: Memenuhi kapasitas koridor lorong, memicu penumpukan massa di pintu keluar (*exit discharge*). |
 | **`case_19`** | `case_19_parkir_liar.yaml` | **Deretan Parkir Liar Motor**: Mempersempit kapasitas jaringan lorong evakuasi gedung, diuji dengan algoritma Max Flow. |
-| **`case_22`** | `case_22_posyandu_meluap.yaml` | **Antrean Posyandu Meluber**: Antrean ibu dan balita memenuhi lorong, mengurangi *throughput* aliran evakuasi darurat. |
+| **`case_22`** | `case_22_konser_jis.yaml` | **Arus Lalu Lintas Konser JIS**: Penutupan akses drop-off dan penyempitan lajur memotong kapasitas jaringan jalan menuju stadion, sehingga *max flow* dan *min-cut* berubah tiap event. |
 | **`case_25`** | `case_25_rombongan_besan.yaml` | **Rombongan Pengantin**: Arus rombongan yang berjalan lambat membatasi kapasitas maksimum jalur koridor utama. |
 | **`case_27`** | `case_27_ambulans_masuk.yaml` | **Evakuasi Medis Emergency**: Penutupan parsial koridor untuk alur kerek tabung/stretcher, memicu penyempitan kapasitas *sink*. |
 
@@ -135,7 +135,7 @@ cases/scenarios/
 ├── case_19_parkir_liar.yaml          (Max Flow - Ford-Fulkerson/Dinic)
 ├── case_20_asap_sate.yaml            (Graph Coloring - DSATUR/Greedy)
 ├── case_21_anjing_galak.yaml         (Graph Coloring - DSATUR/Greedy)
-├── case_22_posyandu_meluap.yaml      (Max Flow - Ford-Fulkerson/Dinic)
+├── case_22_konser_jis.yaml           (Max Flow - Ford-Fulkerson/Dinic)
 ├── case_23_tumpahan_cat.yaml         (Spanning Tree - Kruskal/Prim)
 ├── case_24_kabel_putus.yaml          (Spanning Tree - Kruskal/Prim)
 ├── case_25_rombongan_besan.yaml      (Max Flow - Ford-Fulkerson/Dinic)
